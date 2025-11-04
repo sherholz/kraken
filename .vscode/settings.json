@@ -4,6 +4,7 @@
         "pxr_DIR": "${workspaceFolder}/deps/pxr",
         "OpenSubdiv_DIR": "${workspaceFolder}/deps/pxr/lib/cmake/OpenSubdiv",
         "Imath_DIR": "${workspaceFolder}/deps/pxr/lib/cmake/Imath",
+        "CMAKE_INSTALL_PREFIX":"${workspaceFolder}/install",
     },
     
     "files.associations": {
