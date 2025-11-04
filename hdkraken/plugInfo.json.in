@@ -1,0 +1,22 @@
+{
+    "Plugins": [
+        {
+            "Info": {
+                "Types": {
+                    "@PLUG_CLASS@": {
+                        "bases": [
+                            "HdRendererPlugin"
+                        ],
+                        "displayName": "@PLUG_DISPLAYNAME@",
+                        "priority": 0
+                    }
+                }
+            },
+            "LibraryPath": "@PLUG_INFO_LIBRARY_PATH@",
+            "Name": "@PLUG_DISPLAYNAME@",
+            "ResourcePath": "@PLUG_INFO_RESOURCE_PATH@",
+            "Root": "@PLUG_INFO_ROOT@",
+            "Type": "library"
+        }
+    ]
+}
