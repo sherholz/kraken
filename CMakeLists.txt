@@ -12,6 +12,10 @@ include(GNUInstallDirs)
 include(ProcessorCount)
 include(CMakeDependentOption)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
 option(BUILD_KRAKEN "Build the Kraken render engine" ON)
 option(BUILD_HDKRAKEN "Build the Kraken USD Hydra delegate engine" ON)
 option(BUILD_VIEWER "Build the USD viewer" ON)

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(hdkaken VERSION 1.0 LANGUAGES C CXX)
 
+find_package(OpenGL REQUIRED)
 find_package(pxr CONFIG REQUIRED)
 
 set(HDKRAKEN_SRC)
@@ -10,8 +11,13 @@ set(HDKRAKEN_SRC)
 add_library(hdKraken SHARED
     ${HDKRAKEN_SRC}
         src/renderDelegate.cpp
+        src/mesh.cpp
+        src/rendererPlugin.cpp
+        src/renderPass.cpp
   )
 
+target_include_directories(hdKraken PUBLIC ${PXR_INCLUDE_DIRS})
+target_link_libraries(hdKraken PUBLIC hd tf)
 
 if(USE_HOUDINI_USD)
 set (HDKRAKEN_RPATH
