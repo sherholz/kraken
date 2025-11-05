@@ -1,9 +1,7 @@
 {
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.configureSettings":{
-        "pxr_DIR": "${workspaceFolder}/deps/pxr",
-        "OpenSubdiv_DIR": "${workspaceFolder}/deps/pxr/lib/cmake/OpenSubdiv",
-        "Imath_DIR": "${workspaceFolder}/deps/pxr/lib/cmake/Imath",
+        "CMAKE_PREFIX_PATH": "${workspaceFolder}/deps/pxr",
         "CMAKE_INSTALL_PREFIX":"${workspaceFolder}/install",
     },
     
