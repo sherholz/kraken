@@ -14,7 +14,7 @@ if (APPLE)
 elseif(WIN32)
   set(OPENUSD_OSSUFFIX "win11-x64.zip")
 else()
-    set(OPENUSD_OSSUFFIX "linux.x64.tar.xz")
+    set(OPENUSD_OSSUFFIX "linux-x64.tar.xz")
 endif()
 
 set(OPENUSD_URL "https://github.com/sherholz/kraken/releases/download/OpenUSD-v${OPENUSD_VERSION}/OpenUSD-v${OPENUSD_VERSION}-${OPENUSD_OSSUFFIX}")
