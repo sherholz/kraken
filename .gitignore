@@ -1,3 +1,6 @@
 build/*
 install/*
 deps/*
+
+.cache/*
+compile_commands.json
