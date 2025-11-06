@@ -19,6 +19,13 @@ add_library(hdKraken SHARED
 target_include_directories(hdKraken PUBLIC ${PXR_INCLUDE_DIRS})
 target_link_libraries(hdKraken PUBLIC hd tf)
 
+if(WIN32)
+    target_compile_definitions(hdKraken PRIVATE 
+        NOMINMAX
+        WIN32_LEAN_AND_MEAN
+    )
+endif()
+
 if(USE_HOUDINI_USD)
 set (HDKRAKEN_RPATH
   "$ORIGIN:${HOUDINI_ROOT}/dsolib:$ORIGIN/../../lib")
