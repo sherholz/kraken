@@ -3,9 +3,10 @@ find_package(pxr CONFIG REQUIRED)
 #find_package(nanogui CONFIG REQUIRED)
 
 add_executable(viewer
-  viewer.cpp
+  main.cpp
+  USDRenderApplication.cpp
+  USDRenderApplicationWindow.cpp
 )
-
 
 message(STATUS "PXR_CMAKE_DIR = ${PXR_CMAKE_DIR}")
 
