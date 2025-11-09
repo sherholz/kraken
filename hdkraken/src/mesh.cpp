@@ -40,7 +40,7 @@ HdKrakenMesh::Sync(HdSceneDelegate *sceneDelegate,
                    HdDirtyBits     *dirtyBits,
                    TfToken const   &reprToken)
 {
-    std::cout << "* (multithreaded) Sync Tiny Mesh id=" << GetId() << std::endl;
+    std::cout << "* (multithreaded) Sync Kraken Mesh id=" << GetId() << std::endl;
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE

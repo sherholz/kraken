@@ -14,6 +14,9 @@ add_library(hdKraken SHARED
         src/mesh.cpp
         src/rendererPlugin.cpp
         src/renderPass.cpp
+        src/renderBuffer.cpp
+        src/renderer.cpp
+        src/config.cpp
   )
 
 target_include_directories(hdKraken PUBLIC ${PXR_INCLUDE_DIRS})
@@ -31,7 +34,7 @@ set_target_properties(hdKraken PROPERTIES
   PREFIX ""
   INSTALL_RPATH ${HDKRAKEN_RPATH}
 )
-install(TARGETS hdKraken DESTINATION plugin/usd)
+install(TARGETS hdKraken DESTINATION ${pxr_DIR}/plugin/usd)
 
 # plugInfo.json
 set(PLUG_CLASS "HdKrakenRendererPlugin")
@@ -45,4 +48,4 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json
   @ONLY
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json" DESTINATION "plugin/usd/${PLUG_NAME}/resources")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json" DESTINATION "${pxr_DIR}/plugin/usd/${PLUG_NAME}/resources")

@@ -4,8 +4,8 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#ifndef EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDERER_PLUGIN_H
-#define EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDERER_PLUGIN_H
+#ifndef EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDERER_PLUGIN_H
+#define EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDERER_PLUGIN_H
 
 #include <pxr/pxr.h>
 #include <pxr/imaging/hd/rendererPlugin.h>
@@ -55,4 +55,4 @@ private:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif // EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDERER_PLUGIN_H
+#endif // EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDERER_PLUGIN_H

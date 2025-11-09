@@ -4,8 +4,8 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#ifndef EXTRAS_IMAGING_EXAMPLES_HD_TINY_MESH_H
-#define EXTRAS_IMAGING_EXAMPLES_HD_TINY_MESH_H
+#ifndef EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_MESH_H
+#define EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_MESH_H
 
 #include <pxr/pxr.h>
 #include <pxr/imaging/hd/mesh.h>
@@ -115,4 +115,4 @@ protected:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif // EXTRAS_IMAGING_EXAMPLES_HD_TINY_MESH_H
+#endif // EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_MESH_H

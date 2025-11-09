@@ -4,11 +4,19 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#ifndef EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDER_PASS_H
-#define EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDER_PASS_H
+#ifndef EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDER_PASS_H
+#define EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDER_PASS_H
 
 #include <pxr/pxr.h>
+#include <pxr/imaging/hd/aov.h>
 #include <pxr/imaging/hd/renderPass.h>
+#include <pxr/imaging/hd/renderThread.h>
+
+#include <pxr/base/gf/matrix4d.h>
+#include <pxr/base/gf/rect2i.h>
+
+#include "renderBuffer.h"
+#include "renderer.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -24,11 +32,23 @@ public:
     /// Renderpass constructor.
     ///   \param index The render index containing scene data to render.
     ///   \param collection The initial rprim collection for this renderpass.
+    ///   \param renderThread A handle to the global render thread.
+    ///   \param renderer A handle to the global renderer.
     HdKrakenRenderPass(HdRenderIndex *index,
-                       HdRprimCollection const &collection);
+                       HdRprimCollection const &collection,
+                       HdRenderThread *renderThread,
+                       HdKrakenRenderer *renderer,
+                       std::atomic<int> *sceneVersion);
 
     /// Renderpass destructor.
     virtual ~HdKrakenRenderPass();
+
+    // -----------------------------------------------------------------------
+    // HdRenderPass API
+
+    /// Determine whether the sample buffer has enough samples.
+    ///   \return True if the image has enough samples to be considered final.
+    bool IsConverged() const override;
 
 protected:
 
@@ -40,8 +60,44 @@ protected:
         HdRenderPassStateSharedPtr const& renderPassState,
         TfTokenVector const &renderTags) override;
 
+private:
+    // A handle to the render thread.
+    HdRenderThread *_renderThread;
+
+    // A handle to the global renderer.
+    HdKrakenRenderer *_renderer;
+
+    // A reference to the global scene version.
+    std::atomic<int> *_sceneVersion;
+
+    // The last scene version we rendered with.
+    int _lastSceneVersion;
+
+    // The last settings version we rendered with.
+    int _lastSettingsVersion;
+
+    // The pixels written to. Like viewport in OpenGL,
+    // but coordinates are y-Down.
+    GfRect2i _dataWindow;
+
+    // The view matrix: world space to camera space
+    GfMatrix4d _viewMatrix;
+    // The projection matrix: camera space to NDC space (with
+    // respect to the data window).
+    GfMatrix4d _projMatrix;
+
+    // The list of aov buffers this renderpass should write to.
+    HdRenderPassAovBindingVector _aovBindings;
+
+    // If no attachments are provided, provide an anonymous renderbuffer for
+    // color and depth output.
+    HdKrakenRenderBuffer _colorBuffer;
+    HdKrakenRenderBuffer _depthBuffer;
+
+    // Were the color/depth buffer converged the last time we blitted them?
+    bool _converged;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif // EXTRAS_IMAGING_EXAMPLES_HD_TINY_RENDER_PASS_H
+#endif // EXTRAS_IMAGING_EXAMPLES_HD_KRAKEN_RENDER_PASS_H
