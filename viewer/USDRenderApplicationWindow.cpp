@@ -14,10 +14,9 @@ std::string vertex_shader{
             out vec2 uv;
 
             void main() {
-                vec4(position, 1.0);
+                vec4 p = vec4(position, 1.0);
                 gl_Position = p;
-                position_background = (matrix_background * p).xy;
-                uv = vec2((position.x+1.f)/2.f,position.y+1.f)/2.f);
+                uv = vec2((position.x+1.f)/2.f,(position.y+1.f)/2.f);
             })"
 #elif defined(NANOGUI_USE_GLES)
     R"(/* Vertex shader */
@@ -29,7 +28,7 @@ std::string vertex_shader{
             void main() {
                 vec4 p = vec4(position, 1.0);
                 gl_Position = p;
-                uv = vec2((position.x+1.f)/2.f,position.y+1.f)/2.f);
+                uv = vec2((position.x+1.f)/2.f,(position.y+1.f)/2.f);
             })"
 #elif defined(NANOGUI_USE_METAL)
     R"(
