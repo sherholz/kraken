@@ -6,6 +6,7 @@ add_executable(viewer
   main.cpp
   USDRenderApplication.cpp
   USDRenderApplicationWindow.cpp
+  SimpleRenderTask.cpp
 )
 
 message(STATUS "PXR_CMAKE_DIR = ${PXR_CMAKE_DIR}")

@@ -5,9 +5,35 @@
 
 #include <pxr/imaging/hio/image.h>
 
+#include <pxr/imaging/hd/camera.h>
+#include <pxr/imaging/hd/pluginRenderDelegateUniqueHandle.h>
+#include <pxr/imaging/hd/task.h>
+#include <pxr/imaging/hd/rendererPlugin.h>
+
+#include <pxr/imaging/hdx/taskController.h>
+
+#include <pxr/usdImaging/usdAppUtils/camera.h>
+#include <pxr/usdImaging/usdImaging/delegate.h>
+
+#include <pxr/base/tf/staticTokens.h>
+
+#include "SimpleRenderTask.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
+
+#if PXR_USE_NAMESPACES
+using namespace pxr;
+#endif
+
+TF_DEFINE_PRIVATE_TOKENS(
+    g_tokens,
+
+    (iadCollection)
+    (renderBufferDescriptor)
+    ((rendermode, "spyri4:rendermode"))
+);
 
 std::istream &operator>>(std::istream &is, std::tuple<int, int> &ints)
 {
@@ -62,8 +88,6 @@ ApplicationParameter::ApplicationParameter(int argc, char **argv)
         // return false;
     }
 
-    std::cout << "read config" << std::endl;
-
     if (batch)
     {
         this->batch = args::get(batch);
@@ -97,10 +121,11 @@ std::string ApplicationParameter::toString() const
     return ss.str();
 }
 
-USDRenderApplication::USDRenderApplication(const ApplicationParameter &args)
+USDRenderApplication::USDRenderApplication(const ApplicationParameter &args) : args(args)
 {
     Intialize();
     LoadUSDScene(args.usdFilePath);
+    resolution = args.resolution;
 }
 
 void USDRenderApplication::Intialize()
@@ -112,15 +137,19 @@ void USDRenderApplication::Intialize()
 
     if (pluginDescs.size() > 0)
     {
-        std::cout << "Renderers:" << std::endl;
         for (size_t i = 0; i < pluginDescs.size(); ++i)
         {
-            // if (pluginDescs[i].displayName == defaultRendererDisplayName
-            //||  pluginDescs[i].id == defaultRendererDisplayName) {
-            //     return pluginDescs[i].id;
-            // }
-            std::cout << "\t renderer[" << i << "]: displayName = " << pluginDescs[i].displayName << "\t id = " << pluginDescs[i].id << std::endl;
+            availableRenderDelegates[pluginDescs[i].displayName] = pluginDescs[i].id;
         }
+    }
+
+    auto renderDelegateEntry = availableRenderDelegates.find(args.renderer);
+    if (renderDelegateEntry != availableRenderDelegates.end())
+    {
+        pxr::HdRendererPluginHandle plugin = pluginRegistry.GetOrCreateRendererPlugin(pxr::TfToken(availableRenderDelegates[args.renderer]));
+    }
+    else
+    {
     }
 }
 
@@ -142,16 +171,167 @@ std::vector<pxr::SdfPath> USDRenderApplication::FindAvailableCameras()
         break;
     }
 
-    if (sceneCameras.size() > 0)
-    {
-        std::cout << "Scene cameras:" << std::endl;
-        for (int i = 0; i < sceneCameras.size(); i++)
-        {
-            std::cout << "\t camera[" << i << "] = " << sceneCameras[i] << std::endl;
+    return sceneCameras;
+}
+
+void USDRenderApplication::PrintAvailableRenderDelegates() const
+{
+    if(availableRenderDelegates.size() > 0){
+        std::cout << "Renderers:" << std::endl;
+        int i = 0;
+        for(auto it = availableRenderDelegates.begin(); it != availableRenderDelegates.end(); ++it) {
+            std::cout << "\t renderer[" << i << "] = " << it->first << std::endl;
+            i++;
         }
     }
+}
 
-    return sceneCameras;
+void USDRenderApplication::PrintAvailableCameras() const
+{
+    if (cameras.size() > 0)
+    {
+        std::cout << "Cameras:" << std::endl;
+        for (int i = 0; i < cameras.size(); i++)
+        {
+            std::cout << "\t camera[" << i << "] = " << cameras[i] << std::endl;
+        }
+    }
+}
+
+void USDRenderApplication::Prepare()
+{
+    // prepare camera
+    pxr::SdfPath cameraPath = pxr::SdfPath(args.camera);
+    pxr::UsdGeomCamera camera = pxr::UsdAppUtilsGetCameraAtPath(stage, cameraPath);
+    if(camera){
+        std::cout << "Camera exists" << std::endl;
+    } else {
+        std::cout << "No Camera" << std::endl;
+    }
+
+    pxr::HdRendererPluginRegistry &pluginRegistry = pxr::HdRendererPluginRegistry::GetInstance();
+
+    pxr::HdRendererPluginHandle plugin = pluginRegistry.GetOrCreateRendererPlugin(pxr::TfToken(availableRenderDelegates[args.renderer]));
+
+    if(!plugin) {
+        std::cout << "Renderer not found/supported: " << args.renderer << std::endl;
+    }
+    else
+    {
+        std::cout << "Renderer loaded: " << args.renderer << std::endl;
+    }
+    // prepare delegate
+    std::cout << "Render Delegate" << std::endl;
+    renderDelegate = plugin->CreateRenderDelegate();
+    renderDelegate->SetRenderSetting(pxr::HdRenderSettingsTokens->enableInteractive, pxr::VtValue(false));
+
+    std::cout << "Render Index" << std::endl;
+    renderIndex = pxr::HdRenderIndex::New(renderDelegate, pxr::HdDriverVector());
+    std::cout << "HdCamera" << std::endl;
+    pxr::HdCamera* hdCamera = static_cast<pxr::HdCamera*>(renderIndex->GetSprim(pxr::HdTokens->camera, cameraPath));
+
+    std::cout << "Scene Delegate" << std::endl;
+    sceneDelegate = std::make_unique<pxr::UsdImagingDelegate>(renderIndex, pxr::SdfPath::AbsoluteRootPath());
+    //sceneDelegate = std::make_unique<pxr::UsdImagingDelegate>(renderIndex, pxr::SdfPath::AbsoluteRootPath());
+    //sceneDelegate->Populate(stage->GetPseudoRoot());
+    //sceneDelegate->SetTime(0);
+    //sceneDelegate->SetRefineLevelFallback(4);
+
+    pxr::SdfPath controllerId("/controllerIs");
+    taskController =  new pxr::HdxTaskController(renderIndex,controllerId, false);
+    
+    std::cout << "RenderBuffer" << std::endl;
+    // Set up rendering context.
+    renderBuffer = (pxr::HdRenderBuffer*) renderDelegate->CreateFallbackBprim(pxr::HdPrimTypeTokens->renderBuffer);
+    renderBuffer->Allocate(pxr::GfVec3i(resolution.x(), resolution.y(), 1), pxr::HdFormatFloat32Vec4, false);
+
+
+    std::cout << "RenderBuffer: width = " << (int) renderBuffer->GetWidth() << "\t height = " << (int) renderBuffer->GetHeight() << "\t depth = " << (int) renderBuffer->GetDepth() << std::endl;
+
+    std::cout << "AOVs" << std::endl;
+    pxr::HdRenderPassAovBindingVector aovBindings(1);
+    aovBindings[0].aovName = pxr::HdAovTokens->color;
+    aovBindings[0].renderBuffer = renderBuffer;
+    aovBindings[0].renderBufferId = pxr::SdfPath("/framebuffer/color");
+    aovId.push_back(aovBindings[0].renderBufferId);
+
+    pxr::CameraUtilFraming framing;
+    framing.dataWindow = pxr::GfRect2i(pxr::GfVec2i(0, 0), pxr::GfVec2i(resolution.x(), resolution.y()));
+    framing.displayWindow = pxr::GfRange2f(pxr::GfVec2f(0.0f, 0.0f), pxr::GfVec2f((float) resolution.x(), (float) resolution.y()));
+    framing.pixelAspectRatio = (float) resolution.y() / (float) resolution.x();
+
+    std::cout << "RenderPassState" << std::endl;
+    renderPassState = std::make_shared<pxr::HdRenderPassState>();
+
+
+  #if PXR_VERSION <= 2311
+    std::pair<bool, CameraUtilConformWindowPolicy> overrideWindowPolicy(false, CameraUtilFit);
+    renderPassState->SetCameraAndFraming(camera, framing, overrideWindowPolicy);
+#else
+    std::optional<pxr::CameraUtilConformWindowPolicy> overrideWindowPolicy(pxr::CameraUtilFit);
+    renderPassState->SetCamera(hdCamera);
+    renderPassState->SetFraming(framing);
+    renderPassState->SetOverrideWindowPolicy(overrideWindowPolicy);
+#endif
+
+    renderPassState->SetAovBindings(aovBindings);
+
+
+    pxr::HdRprimCollection renderCollection(pxr::HdTokens->geometry, pxr::HdReprSelector(pxr::HdReprTokens->refined));
+    std::cout << "RenderPass" << std::endl;
+    pxr::HdRenderPassSharedPtr renderPass = renderDelegate->CreateRenderPass(renderIndex, renderCollection);
+
+    pxr::TfTokenVector renderTags(1, pxr::HdRenderTagTokens->geometry);
+    auto renderTask = std::make_shared<SimpleRenderTask>(renderPass, renderPassState, renderTags);
+
+    //pxr::HdTaskSharedPtrVector tasks;
+    tasks.push_back(renderTask);
+
+
+
+/*
+    pxr::HdEngine engine;
+    engine.Execute(renderIndex, &tasks);
+    renderBuffer->Resolve();
+
+    renderTimer.Stop();
+        printf("Rendering finished (%.3fs)\n", renderTimer.GetSeconds());
+    fflush(stdout);
+*/
+}
+void USDRenderApplication::Render()
+{
+    std::cout << "renderBuffer: width = " << renderBuffer->GetWidth() << " height = " << renderBuffer->GetHeight() << std::endl;
+    // Perform rendering.
+    pxr::TfStopwatch renderTimer;
+    renderTimer.Start();
+    pxr::HdEngine engine;
+    engine.Execute(renderIndex, &tasks);
+    renderBuffer->Resolve();
+
+    renderTimer.Stop();
+    printf("Rendering finished (%.3fs)\n", renderTimer.GetSeconds());
+    fflush(stdout);
+}
+
+void USDRenderApplication::Run()
+{
+    if (args.listRenderDelegates)
+    {
+        PrintAvailableRenderDelegates();
+    }
+
+    if (args.listCameras)
+    {
+        PrintAvailableCameras();
+    }
+
+    if (args.listRenderDelegates)
+    {
+        Prepare();
+        Render();
+        StoreImage();
+    }
 }
 
 void USDRenderApplication::LoadUSDScene(const std::string &usdFilePath)
@@ -197,5 +377,46 @@ void USDRenderApplication::StoreImage()
 
 void USDRenderApplication::Resize(const nanogui::Vector2i size)
 {
-    std::cout << "USDRenderApplication::Resize" << std::endl;
+    std::cout << "USDRenderApplication::Resize = " << size << std::endl;
+    resolution = size;
+    /**/
+    /*
+    pxr::CameraUtilFraming framing;
+    framing.dataWindow = pxr::GfRect2i(pxr::GfVec2i(0, 0), pxr::GfVec2i(resolution.x(), resolution.y()));
+    framing.displayWindow = pxr::GfRange2f(pxr::GfVec2f(0.0f, 0.0f), pxr::GfVec2f((float) resolution.x(), (float) resolution.y()));
+    framing.pixelAspectRatio = (float) resolution.y() / (float) resolution.x();
+    renderPassState->SetFraming(framing);
+    */
+    /**/
+    //fbWidth = width;
+    //fbHeight = height;
+/* */
+    pxr::GfVec4d viewport(0.f,0.f,resolution.x(),resolution.y());
+    renderPassState->SetViewport(viewport);
+    //this->taskController->SetRenderViewport(viewport);
+    /* */
+    /*
+    if (sceneDelegate) {
+        for (const auto &id: aovId) {
+            pxr::HdRenderBufferDescriptor desc =
+            sceneDelegate->GetRenderBufferDescriptor(id);
+            desc.dimensions[0] = resolution.x();
+            desc.dimensions[1] = resolution.y();
+            std::cout << "id = " << id << std::endl;
+            //sceneDelegate->SetReprFallback
+            //((pxr::HdSceneDelegate*)sceneDelegate.get())->SetParameter(id,
+            //    g_tokens->renderBufferDescriptor, desc);
+            renderIndex->GetChangeTracker().MarkBprimDirty(id,
+                pxr::HdRenderBuffer::DirtyDescription);
+            //GfVec4d viewport(0, 0, fbWidth, fbHeight);
+            //internalSceneDelegate->SetCamera(renderPassState, viewport);
+        }
+    }
+        */
+    /**/
+    /* */
+/**/
+    //renderBuffer->Map();
+    //renderBuffer->Allocate(pxr::GfVec3i(resolution.x(), resolution.y(), 1), pxr::HdFormatFloat32Vec4, false);
+    //renderBuffer->Unmap();
 }

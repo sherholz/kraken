@@ -15,7 +15,7 @@ using namespace nanogui;
 class USDRenderApplicationWindow : public Screen
 {
 public:
-    USDRenderApplicationWindow(const ApplicationParameter &appPar);
+    USDRenderApplicationWindow(USDRenderApplication* app);
 
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers) override;
 
@@ -33,5 +33,4 @@ private:
     ref<Texture> m_frame_buffer;
 
     USDRenderApplication *app;
-    ApplicationParameter appPar;
 };

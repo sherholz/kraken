@@ -97,10 +97,10 @@ std::string fragment_shader{
 #endif
 };
 
-USDRenderApplicationWindow::USDRenderApplicationWindow(const ApplicationParameter &appPar) : Screen(Vector2i(appPar.resolution.x() / 2, appPar.resolution.y() / 2), "NanoGUI Test")
+USDRenderApplicationWindow::USDRenderApplicationWindow(USDRenderApplication* app) : Screen(app->getResolution() / 2, "NanoGUI Test")
 {
     inc_ref();
-    Vector2i viewport_size(appPar.resolution.x(), appPar.resolution.y());
+    Vector2i viewport_size = app->getResolution();
     this->m_frame_buffer = new Texture(
         Texture::PixelFormat::RGBA,
         Texture::ComponentFormat::Float32,
@@ -145,8 +145,8 @@ USDRenderApplicationWindow::USDRenderApplicationWindow(const ApplicationParamete
     m_shader->set_buffer("indices", VariableType::UInt32, {3 * 2}, indices);
     m_shader->set_buffer("position", VariableType::Float32, {4, 3}, positions);
 
-    this->appPar = appPar;
-    app = new USDRenderApplication(appPar);
+    this->app = app;
+    app->Prepare();
 }
 
 bool USDRenderApplicationWindow::keyboard_event(int key, int scancode, int action, int modifiers)
@@ -170,13 +170,15 @@ void USDRenderApplicationWindow::draw(NVGcontext *ctx)
 void USDRenderApplicationWindow::draw_contents()
 {
 
+    std::cout << "framebuffer_size" << framebuffer_size() << std::endl;
+    app->Render();
+
     m_shader->set_texture("image", m_frame_buffer);
     m_render_pass->resize(framebuffer_size());
     m_render_pass->begin();
 
     m_shader->begin();
     m_shader->draw_array(Shader::PrimitiveType::Triangle, 0, 6, true);
-
     m_shader->end();
 
     m_render_pass->end();

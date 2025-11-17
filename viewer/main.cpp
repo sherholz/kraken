@@ -26,15 +26,16 @@
 
 int main(int argc, char **argv)
 {
+    ApplicationParameter appPar(argc, argv);
+    USDRenderApplication* app = new USDRenderApplication(appPar);
+    if (!appPar.batch){
     try
     {
         nanogui::init();
-
-        ApplicationParameter appPar(argc, argv);
         /* scoped variables */ {
-            ref<USDRenderApplicationWindow> app = new USDRenderApplicationWindow(appPar);
-            app->dec_ref();
-            app->set_visible(true);
+            ref<USDRenderApplicationWindow> appWindow = new USDRenderApplicationWindow(app);
+            appWindow->dec_ref();
+            appWindow->set_visible(true);
             nanogui::run(RunMode::VSync);
         }
 
@@ -53,6 +54,13 @@ int main(int argc, char **argv)
     catch (...)
     {
         std::cerr << "Caught an unknown error!" << std::endl;
+    }
+    }
+    else 
+    {
+        app->Run();
+        //app->Render();
+        //app->StoreImage();
     }
     return 0;
 }
