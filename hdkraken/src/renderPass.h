@@ -91,8 +91,8 @@ private:
 
     // If no attachments are provided, provide an anonymous renderbuffer for
     // color and depth output.
-    HdKrakenRenderBuffer _colorBuffer;
-    HdKrakenRenderBuffer _depthBuffer;
+    //HdKrakenRenderBuffer _colorBuffer;
+    //HdKrakenRenderBuffer _depthBuffer;
 
     // Were the color/depth buffer converged the last time we blitted them?
     bool _converged;

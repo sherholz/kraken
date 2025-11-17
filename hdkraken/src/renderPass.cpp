@@ -26,8 +26,6 @@ HdKrakenRenderPass::HdKrakenRenderPass(HdRenderIndex *index,
     , _viewMatrix(1.0f) // == identity
     , _projMatrix(1.0f) // == identity
     , _aovBindings()
-    , _colorBuffer(SdfPath::EmptyPath())
-    , _depthBuffer(SdfPath::EmptyPath())
     , _converged(false)
 {
 }
@@ -93,32 +91,19 @@ void HdKrakenRenderPass::_Execute(
     
 
     const GfRect2i dataWindow = _GetDataWindow(renderPassState);
-
+    std::cout << dataWindow << std::endl;
     if (_dataWindow != dataWindow)
     {
         _dataWindow = dataWindow;
 
         _renderThread->StopRender();
         _renderer->SetDataWindow(dataWindow);
-
+        
         if (!renderPassState->GetFraming().IsValid())
         {
-            // Support clients that do not use the new framing API
-            // and do not use AOVs.
-            //
-            // Note that we do not support the case of using the
-            // new camera framing API without using AOVs.
-            //
-            const GfVec3i dimensions(_dataWindow.GetWidth(),
-                                     _dataWindow.GetHeight(),
-                                     1);
-            std::cout << "_colorBuffer.Allocate = " << dimensions << std::endl;
-            _colorBuffer.Allocate(
-                dimensions,
-                HdFormatFloat32Vec4,
-                /*multiSampled=*/true);
+            std::cout << "ERROR Framing is invalid" << std::endl;
         }
-
+        
         needReStartRender = true;
     }
     // Determine whether we need to update the renderer AOV bindings.
@@ -138,19 +123,7 @@ void HdKrakenRenderPass::_Execute(
         _renderThread->StopRender();
         if (aovBindings.empty())
         {
-            HdRenderPassAovBinding colorAov;
-            colorAov.aovName = HdAovTokens->color;
-            colorAov.renderBuffer = &_colorBuffer;
-            colorAov.clearValue =
-                VtValue(GfVec4f(0.0707f, 0.0707f, 0.0707f, 1.0f));
-            aovBindings.push_back(colorAov);
-            /*
-            HdRenderPassAovBinding depthAov;
-            depthAov.aovName = HdAovTokens->depth;
-            depthAov.renderBuffer = &_depthBuffer;
-            depthAov.clearValue = VtValue(1.0f);
-            aovBindings.push_back(depthAov);
-            */
+            std::cout << "ERROR empty AOV Bindings" << std::endl;
         }
         _renderer->SetAovBindings(aovBindings);
         // In general, the render thread clears aov bindings, but make sure
