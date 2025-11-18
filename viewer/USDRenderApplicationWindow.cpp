@@ -170,7 +170,7 @@ void USDRenderApplicationWindow::draw(NVGcontext *ctx)
 void USDRenderApplicationWindow::draw_contents()
 {
 
-    std::cout << "framebuffer_size" << framebuffer_size() << std::endl;
+    //std::cout << "framebuffer_size" << framebuffer_size() << std::endl;
     app->Render();
 
     m_shader->set_texture("image", m_frame_buffer);
@@ -195,8 +195,9 @@ bool USDRenderApplicationWindow::resize_event(const Vector2i &size)
 {
     std::cout << "resize: " << size << std::endl;
     std::cout << "framebuffer_size: " << framebuffer_size() << std::endl;
+    std::cout << "m_pixel_ratio: " << m_pixel_ratio << std::endl;
 
-    Vector2i real_size = size * 2;
+    Vector2i real_size = size * m_pixel_ratio;
     this->m_frame_buffer->resize(real_size);
 
     float *img_data = new float[real_size.x() * real_size.y() * 4];
