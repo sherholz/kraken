@@ -19,8 +19,10 @@ add_library(hdKraken SHARED
         src/config.cpp
   )
 
+add_dependencies(hdKraken glm)
+
 target_include_directories(hdKraken PUBLIC ${PXR_INCLUDE_DIRS})
-target_link_libraries(hdKraken PUBLIC hd tf)
+target_link_libraries(hdKraken PUBLIC hd tf glm)
 
 if(USE_HOUDINI_USD)
 set (HDKRAKEN_RPATH

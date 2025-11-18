@@ -4,3 +4,7 @@ set(NANOGUI_BUILD_EXAMPLES OFF)
 set(NANOGUI_BUILD_PYTHON OFF)
 
 add_subdirectory (nanogui)
+
+
+set(GLM_BUILD_INSTALL ON)
+add_subdirectory (glm)
