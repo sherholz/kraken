@@ -3,10 +3,10 @@
 #include <pxr/imaging/hd/renderPass.h>
 #include <pxr/imaging/hd/renderPassState.h>
 
-class SimpleRenderTask final : public pxr::HdTask
+class RenderTask final : public pxr::HdTask
 {
 public:
-    SimpleRenderTask(const pxr::HdRenderPassSharedPtr &renderPass,
+    RenderTask(const pxr::HdRenderPassSharedPtr &renderPass,
                      const pxr::HdRenderPassStateSharedPtr &renderPassState,
                      const pxr::TfTokenVector &renderTags);
 

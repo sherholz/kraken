@@ -1,5 +1,5 @@
-#include "SimpleRenderTask.h"
-SimpleRenderTask::SimpleRenderTask(const pxr::HdRenderPassSharedPtr& renderPass,
+#include "RenderTask.h"
+RenderTask::RenderTask(const pxr::HdRenderPassSharedPtr& renderPass,
                                    const pxr::HdRenderPassStateSharedPtr& renderPassState,
                                    const pxr::TfTokenVector& renderTags)
   : pxr::HdTask(pxr::SdfPath::EmptyPath())
@@ -9,7 +9,7 @@ SimpleRenderTask::SimpleRenderTask(const pxr::HdRenderPassSharedPtr& renderPass,
 {
 }
 
-void SimpleRenderTask::Sync(pxr::HdSceneDelegate* sceneDelegate,
+void RenderTask::Sync(pxr::HdSceneDelegate* sceneDelegate,
                             pxr::HdTaskContext* taskContext,
                             pxr::HdDirtyBits* dirtyBits)
 {
@@ -21,7 +21,7 @@ void SimpleRenderTask::Sync(pxr::HdSceneDelegate* sceneDelegate,
   *dirtyBits = pxr::HdChangeTracker::Clean;
 }
 
-void SimpleRenderTask::Prepare(pxr::HdTaskContext* taskContext,
+void RenderTask::Prepare(pxr::HdTaskContext* taskContext,
                                pxr::HdRenderIndex* renderIndex)
 {
   TF_UNUSED(taskContext);
@@ -30,7 +30,7 @@ void SimpleRenderTask::Prepare(pxr::HdTaskContext* taskContext,
   m_renderPassState->Prepare(resourceRegistry);
 }
 
-void SimpleRenderTask::Execute(pxr::HdTaskContext* taskContext)
+void RenderTask::Execute(pxr::HdTaskContext* taskContext)
 {
   TF_UNUSED(taskContext);
 
@@ -39,7 +39,7 @@ void SimpleRenderTask::Execute(pxr::HdTaskContext* taskContext)
   {}
 }
 
-const pxr::TfTokenVector& SimpleRenderTask::GetRenderTags() const
+const pxr::TfTokenVector& RenderTask::GetRenderTags() const
 {
   return m_renderTags;
 }

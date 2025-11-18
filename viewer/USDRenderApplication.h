@@ -13,6 +13,8 @@
 #include <pxr/usdImaging/usdImaging/delegate.h>
 #include <pxr/usd/usd/stage.h>
 
+#include "RenderSceneDelegate.h"
+
 #include <string>
 #include <sstream>
 
@@ -86,9 +88,9 @@ private:
     pxr::HdRenderIndex* renderIndex;
     pxr::HdTaskSharedPtrVector tasks;
 
-    std::unique_ptr<pxr::HdSceneDelegate> sceneDelegate;
-    //std::unique_ptr<pxr::UsdImagingDelegate> sceneDelegate;
-    pxr::HdxTaskController* taskController;
+    std::unique_ptr<RenderSceneDelegate> renderSceneDelegate;
+    std::unique_ptr<pxr::UsdImagingDelegate> sceneDelegate;
+    //pxr::HdxTaskController* taskController;
 
     pxr::UsdStageRefPtr stage;
     std::vector<pxr::SdfPath> cameras;
