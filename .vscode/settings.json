@@ -97,6 +97,9 @@
         "coroutine": "cpp",
         "source_location": "cpp",
         "ranges": "cpp",
-        "__node_handle": "cpp"
+        "__node_handle": "cpp",
+        "csetjmp": "cpp",
+        "rope": "cpp",
+        "scoped_allocator": "cpp"
     }
 }
