@@ -494,6 +494,10 @@ HdKrakenRenderer::Render(HdRenderThread *renderThread)
     // We consider the image converged after N samples, which is a convenient
     // and simple heuristic.
     std::cout << "_samplesToConvergence = " << _samplesToConvergence << std::endl;
+    HdKrakenRenderBuffer *renderBuffer =
+                    static_cast<HdKrakenRenderBuffer*>(_aovBindings[0].renderBuffer);
+    std::cout << "renderBuffer: size = " << renderBuffer->GetWidth() << "\t" << renderBuffer->GetHeight()<< std::endl;
+    std::cout << "_dataWindows: width = " << _dataWindow.GetWidth() << " height = "<< _dataWindow.GetHeight() << std::endl; 
     for (int i = 0; i < _samplesToConvergence; ++i) {
         // Pause point.
         while (renderThread->IsPauseRequested()) {
@@ -567,7 +571,7 @@ void
 HdKrakenRenderer::_RenderTiles(HdRenderThread *renderThread, int sampleNum,
                                size_t tileStart, size_t tileEnd)
 {
-    std::cout << "HdKrakenRenderer::_RenderTiles" << std::endl; 
+    //std::cout << "HdKrakenRenderer::_RenderTiles" << std::endl; 
     const unsigned int minX = _dataWindow.GetMinX();
     unsigned int minY = _dataWindow.GetMinY();
     const unsigned int maxX = _dataWindow.GetMaxX() + 1;

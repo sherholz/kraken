@@ -27,6 +27,7 @@ const TfTokenVector HdKrakenRenderDelegate::SUPPORTED_SPRIM_TYPES =
 
 const TfTokenVector HdKrakenRenderDelegate::SUPPORTED_BPRIM_TYPES =
 {
+    HdPrimTypeTokens->renderBuffer,
 };
 
 static void _RenderCallback(HdKrakenRenderer *renderer,
@@ -177,7 +178,7 @@ HdKrakenRenderDelegate::Resume()
 void 
 HdKrakenRenderDelegate::CommitResources(HdChangeTracker *tracker)
 {
-    std::cout << "=> CommitResources RenderDelegate" << std::endl;
+    //std::cout << "=> CommitResources RenderDelegate" << std::endl;
 }
 
 HdRenderPassSharedPtr 
@@ -256,7 +257,7 @@ HdBprim *
 HdKrakenRenderDelegate::CreateFallbackBprim(TfToken const& typeId)
 {
     if (typeId == HdPrimTypeTokens->renderBuffer) {
-        return new HdKrakenRenderBuffer(SdfPath::EmptyPath());
+        return new HdKrakenRenderBuffer(SdfPath("/kraken/framebuffer/renderbuffer"));
     } else {
         TF_CODING_ERROR("Unknown Bprim Type %s", typeId.GetText());
     }

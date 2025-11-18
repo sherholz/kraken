@@ -91,7 +91,7 @@ void HdKrakenRenderPass::_Execute(
     
 
     const GfRect2i dataWindow = _GetDataWindow(renderPassState);
-    std::cout << dataWindow << std::endl;
+    //std::cout << dataWindow << std::endl;
     if (_dataWindow != dataWindow)
     {
         _dataWindow = dataWindow;
@@ -133,7 +133,7 @@ void HdKrakenRenderPass::_Execute(
     }
 
     TF_VERIFY(!_aovBindings.empty(), "No aov bindings to render into");
-    std::cout << "needReStartRender = " << needReStartRender << std::endl;
+    //std::cout << "needReStartRender = " << needReStartRender << std::endl;
     // Only start a new render if something in the scene has changed.
     if (needReStartRender)
     {
@@ -143,7 +143,7 @@ void HdKrakenRenderPass::_Execute(
         _renderThread->StartRender();
         //_renderThread->
     }
-    std::cout << "=> Execute RenderPass" << std::endl;
+    //std::cout << "=> Execute RenderPass" << std::endl;
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE
